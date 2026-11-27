@@ -1,0 +1,52 @@
+# ---------- Secrets / environment ----------
+# Set VITE_* values in the Vercel dashboard, never commit them
+.env
+.env.*
+!.env.example
+*.local
+
+# ---------- Dependencies ----------
+node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/releases
+
+# ---------- Build output ----------
+# Vercel builds from source, so the bundle is never committed
+dist/
+dist-ssr/
+.vite/
+*.tsbuildinfo
+
+# ---------- Testing ----------
+coverage/
+
+# ---------- Vercel ----------
+.vercel/
+
+# ---------- Logs ----------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---------- Editors / OS ----------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+.DS_Store
+Thumbs.db
+
+# ---------- Tooling ----------
+graphify-out/
+.claude/settings.local.json
