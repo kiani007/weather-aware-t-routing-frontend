@@ -23,7 +23,8 @@ export interface Checkpoint {
   wind_mph: number | null
   rain_in_hr: number | null
   snow_in_hr: number | null
-  risk: RiskLevel
+  /** Null when the weather at this checkpoint is unknown (no forecast data) */
+  risk: RiskLevel | null
   reasons: string[]
 }
 
@@ -37,6 +38,8 @@ export interface RouteOption {
   duration_s: number
   arrival_at: string
   risk_miles: RiskMiles
+  /** Miles whose weather could not be verified; not counted in risk_miles */
+  unknown_miles: number
   average_risk: number
   max_risk: RiskLevel
   forecast_coverage: number

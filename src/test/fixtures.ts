@@ -40,6 +40,7 @@ export function makeRoute(overrides: Partial<RouteOption> = {}): RouteOption {
     duration_s: 64_080,
     arrival_at: '2026-11-27T14:17:00Z',
     risk_miles: { low: 1004.4, moderate: 0, high: 0, severe: 0, no_travel: 0 },
+    unknown_miles: 0,
     average_risk: 0,
     max_risk: riskLevel('low'),
     forecast_coverage: 1,

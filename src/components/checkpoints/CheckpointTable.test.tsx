@@ -17,7 +17,16 @@ const checkpoints = [
     risk: riskLevel('severe'),
     reasons: ['Wind 37 mph is High', 'Load 45,000 lb raises High wind to Severe'],
   }),
-  makeCheckpoint({ sequence: 2, mile_marker: 75, eta: '2026-11-27T00:10:00Z', has_forecast: false }),
+  makeCheckpoint({
+    sequence: 2,
+    mile_marker: 75,
+    eta: '2026-11-27T00:10:00Z',
+    has_forecast: false,
+    wind_mph: null,
+    rain_in_hr: null,
+    snow_in_hr: null,
+    risk: null,
+  }),
 ]
 
 const rows = () => screen.getAllByRole('row').slice(1)
@@ -39,11 +48,12 @@ describe('CheckpointTable', () => {
     expect(within(rows()[2]!).getAllByRole('cell')[1]).toHaveTextContent('Fri 12:10 AM')
   })
 
-  it('explains the risk on hover and marks missing forecasts', () => {
+  it('explains the risk on hover and marks unknown weather', () => {
     render(<CheckpointTable routeName="Route B" checkpoints={checkpoints} focusedSequence={null} onFocus={() => {}} />)
 
     expect(rows()[1]).toHaveAttribute('title', 'Wind 37 mph is High\nLoad 45,000 lb raises High wind to Severe')
-    expect(within(rows()[2]!).getByText('n/a')).toBeInTheDocument()
+    expect(within(rows()[2]!).getByText('Unknown')).toBeInTheDocument()
+    expect(within(rows()[2]!).queryByText('Low')).not.toBeInTheDocument()
   })
 
   it('focuses a checkpoint when its row is clicked', async () => {
