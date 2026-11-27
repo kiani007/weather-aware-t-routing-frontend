@@ -14,6 +14,8 @@ export interface GridHeatData {
 
 const MAX_ALPHA = 0.62
 const MIN_ALPHA = 0.18
+// Cells with no forecast data: drawn grey so "unknown" never looks like "calm"
+const UNKNOWN_FILL = 'rgba(148,163,184,0.4)'
 
 /**
  * Canvas overlay that paints each forecast grid cell with its true value (no additive
@@ -72,13 +74,16 @@ export class GridHeatLayer extends L.Layer {
 
     points.forEach(([lat, lon], i) => {
       const value = values[i]
-      if (value == null) return
-      const t = Math.min(1, value / max)
-      if (t < minVisible || (minVisible > 0 && t === 0)) return
+      const t = value == null ? null : Math.min(1, value / max)
+      if (t != null && (t < minVisible || (minVisible > 0 && t === 0))) return
       const topLeft = map.latLngToContainerPoint([lat + half, lon - half])
       const bottomRight = map.latLngToContainerPoint([lat - half, lon + half])
-      const [r, g, b] = scale(t)
-      buffer.fillStyle = `rgba(${r},${g},${b},${MIN_ALPHA + (MAX_ALPHA - MIN_ALPHA) * t})`
+      if (t == null) {
+        buffer.fillStyle = UNKNOWN_FILL
+      } else {
+        const [r, g, b] = scale(t)
+        buffer.fillStyle = `rgba(${r},${g},${b},${MIN_ALPHA + (MAX_ALPHA - MIN_ALPHA) * t})`
+      }
       buffer.fillRect(topLeft.x, topLeft.y, bottomRight.x - topLeft.x + 1, bottomRight.y - topLeft.y + 1)
       cellPx ||= bottomRight.x - topLeft.x
     })

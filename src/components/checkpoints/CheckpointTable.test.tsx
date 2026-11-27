@@ -35,7 +35,8 @@ describe('CheckpointTable', () => {
   it('lists mile, ETA, wind, rain, snow and risk for each checkpoint', () => {
     render(<CheckpointTable routeName="Route B" checkpoints={checkpoints} focusedSequence={null} onFocus={() => {}} />)
 
-    expect(screen.getByText('Checkpoints · 3')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Route B checkpoints' })).toBeInTheDocument()
+    expect(rows()).toHaveLength(3)
     const cells = within(rows()[1]!).getAllByRole('cell').map((cell) => cell.textContent)
     expect(cells).toEqual(['50', '9:40 PM', '37 mph', '0.10"', '0.00"', 'Severe'])
   })

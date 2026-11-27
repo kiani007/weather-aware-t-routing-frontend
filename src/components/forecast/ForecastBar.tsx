@@ -61,8 +61,8 @@ export function ForecastBar(props: ForecastBarProps) {
   }
 
   return (
-    <div className="pointer-events-auto flex w-full max-w-3xl flex-col gap-2 rounded-lg border bg-background px-2.5 py-2 shadow-sm md:flex-row md:items-center md:gap-3">
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+    <div className="pointer-events-auto flex w-full max-w-3xl flex-col gap-2 rounded-lg border bg-background px-2.5 py-2 shadow-sm md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-1.5">
+      <div className="flex min-w-0 flex-1 items-center gap-2 md:min-w-64">
         {playButton}
         {timeLabel}
         <Slider
@@ -102,6 +102,10 @@ export function ForecastBar(props: ForecastBarProps) {
         </ToggleGroup>
         {error ? <span className="truncate text-[11px] text-destructive">{error}</span> : <HeatmapLegend metric={metric} />}
       </div>
+      <p className="text-[10px] leading-snug text-muted-foreground md:basis-full">
+        Map shades the {HEATMAP_METRICS[metric].label.toLowerCase()} around the route at {formatShortDateTime(time)}{' '}
+        (grey = no forecast data). Checkpoints are rated at the truck&apos;s ETA, so the two can differ.
+      </p>
     </div>
   )
 }

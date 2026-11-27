@@ -1,7 +1,6 @@
 import { memo, type ReactNode } from 'react'
 
-import { RiskBadge } from '@/components/common/RiskBadge'
-import { SidebarSection } from '@/components/common/SidebarSection'
+import { RiskLabel } from '@/components/common/RiskLabel'
 import { ROUTE_COLORS } from '@/constants/map'
 import { cn } from '@/lib/utils'
 import type { RouteOption } from '@/types/trip'
@@ -30,7 +29,7 @@ const ROWS: Row[] = [
   { label: 'Distance', render: (r) => formatMiles(r.distance_mi), score: (r) => r.distance_mi },
   { label: 'Drive time', render: (r) => formatDuration(r.duration_s), score: (r) => r.duration_s },
   { label: 'ETA', render: (r) => formatShortDateTime(r.arrival_at) },
-  { label: 'Max risk', render: (r) => <RiskBadge risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
+  { label: 'Max risk', render: (r) => <RiskLabel risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
   { label: 'Severe+', render: (r) => formatMiles(severeMiles(r)), score: severeMiles },
   // Same order as the backend ranking: unverified weather counts right after Severe
   { label: 'Unverified', render: (r) => formatMiles(unknownMiles(r)), score: unknownMiles },
@@ -48,7 +47,8 @@ export const RouteComparison = memo(function RouteComparison({
   onSelect,
 }: RouteComparisonProps) {
   return (
-    <SidebarSection title="Compare routes">
+    // Titled by the surrounding tab ("Compare"), so no heading of its own
+    <section aria-label="Compare routes" className="space-y-2.5">
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full table-fixed text-xs">
           <colgroup>
@@ -112,7 +112,7 @@ export const RouteComparison = memo(function RouteComparison({
         </table>
       </div>
       <p className="text-[11px] text-muted-foreground">Bold marks the best value in each row. Click a column to select it.</p>
-    </SidebarSection>
+    </section>
   )
 })
 
