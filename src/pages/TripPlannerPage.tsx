@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { CheckpointTable } from '@/components/checkpoints/CheckpointTable'
 import { ForecastBar } from '@/components/forecast/ForecastBar'
 import { AppShell } from '@/components/layout/AppShell'
+import { MobileSheet, type SheetSnap } from '@/components/layout/MobileSheet'
 import { CheckpointMarkers } from '@/components/map/CheckpointMarkers'
 import { EndpointMarkers } from '@/components/map/EndpointMarkers'
 import { FitBounds } from '@/components/map/FitBounds'
@@ -14,8 +15,10 @@ import { TruckMarker } from '@/components/map/TruckMarker'
 import { RecommendationNote } from '@/components/routes/RecommendationNote'
 import { RouteComparison } from '@/components/routes/RouteComparison'
 import { RouteSelector } from '@/components/routes/RouteSelector'
+import { SelectedRouteSummary } from '@/components/routes/SelectedRouteSummary'
 import { TripForm } from '@/components/trip-form/TripForm'
 import { PLAYBACK_INTERVAL_MS } from '@/constants/heatmap'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { usePlanTrip } from '@/hooks/usePlanTrip'
 import { usePlayback } from '@/hooks/usePlayback'
 import { useTripHeatmap } from '@/hooks/useTripHeatmap'
@@ -36,11 +39,19 @@ export function TripPlannerPage() {
 
   const heatmap = useTripHeatmap(trip?.id)
 
+  const isMobile = useIsMobile()
+  const [sheetTab, setSheetTab] = useState<PanelId>('plan')
+  // Nothing to see on the map before the first plan, so the form gets the room
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>('full')
+
   const plan = usePlanTrip((planned) => {
     setTrip(planned)
     setSelectedRouteId(planned.routes.find((route) => route.is_recommended)?.id ?? planned.routes[0]?.id ?? null)
     setFocusedSequence(null)
     playback.reset()
+    // Mobile: show the routes on the map, with the comparison one tap away
+    setSheetTab('compare')
+    setSheetSnap('peek')
   })
 
   const decodedRoutes = useMemo<DecodedRoute[]>(
@@ -63,20 +74,52 @@ export function TripPlannerPage() {
     setFocusedSequence(null)
   }, [])
 
+  const focusCheckpoint = useCallback(
+    (sequence: number) => {
+      setFocusedSequence(sequence)
+      // Mobile: drop the panel so the map can show the checkpoint
+      if (isMobile) setSheetSnap('peek')
+    },
+    [isMobile],
+  )
+
+  const planPanel = <TripForm onSubmit={plan.mutate} submitting={plan.isPending} error={plan.error?.message} />
+  const comparePanel = trip && (
+    <>
+      {recommendedRoute && <RecommendationNote route={recommendedRoute} />}
+      <RouteComparison routes={trip.routes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />
+    </>
+  )
+  const checkpointsPanel = selectedRoute && (
+    <CheckpointTable
+      routeName={selectedRoute.name}
+      checkpoints={selectedRoute.checkpoints}
+      focusedSequence={focusedSequence}
+      onFocus={focusCheckpoint}
+    />
+  )
+
   const sidebar = (
     <>
-      <TripForm onSubmit={plan.mutate} submitting={plan.isPending} error={plan.error?.message} />
-      {recommendedRoute && <RecommendationNote route={recommendedRoute} />}
-      {trip && <RouteComparison routes={trip.routes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />}
-      {selectedRoute && (
-        <CheckpointTable
-          routeName={selectedRoute.name}
-          checkpoints={selectedRoute.checkpoints}
-          focusedSequence={focusedSequence}
-          onFocus={setFocusedSequence}
-        />
-      )}
+      {planPanel}
+      {comparePanel}
+      {checkpointsPanel}
     </>
+  )
+
+  const sheet = (
+    <MobileSheet<PanelId>
+      tabs={[
+        { id: 'plan', label: 'Plan', content: planPanel },
+        { id: 'compare', label: 'Compare', content: comparePanel, disabled: !trip },
+        { id: 'checkpoints', label: 'Checkpoints', content: checkpointsPanel, disabled: !selectedRoute },
+      ]}
+      tab={sheetTab}
+      onTabChange={setSheetTab}
+      snap={sheetSnap}
+      onSnapChange={setSheetSnap}
+      summary={selectedRoute && <SelectedRouteSummary route={selectedRoute} />}
+    />
   )
 
   const main = (
@@ -118,8 +161,10 @@ export function TripPlannerPage() {
     </>
   )
 
-  return <AppShell sidebar={sidebar} main={main} />
+  return <AppShell sidebar={sidebar} sheet={sheet} main={main} />
 }
+
+type PanelId = 'plan' | 'compare' | 'checkpoints'
 
 function describeTruck(trip: Trip | null, route: RouteOption | null, time: Date | null, enRoute: boolean): string {
   if (!trip || !route || !time) return ''
