@@ -1,7 +1,6 @@
 import { memo, type ReactNode } from 'react'
 
 import { RiskLabel } from '@/components/common/RiskLabel'
-import { SidebarSection } from '@/components/common/SidebarSection'
 import { ROUTE_COLORS } from '@/constants/map'
 import { cn } from '@/lib/utils'
 import type { RouteOption } from '@/types/trip'
@@ -48,7 +47,8 @@ export const RouteComparison = memo(function RouteComparison({
   onSelect,
 }: RouteComparisonProps) {
   return (
-    <SidebarSection title="Compare routes">
+    // Titled by the surrounding tab ("Compare"), so no heading of its own
+    <section aria-label="Compare routes" className="space-y-2.5">
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full table-fixed text-xs">
           <colgroup>
@@ -112,7 +112,7 @@ export const RouteComparison = memo(function RouteComparison({
         </table>
       </div>
       <p className="text-[11px] text-muted-foreground">Bold marks the best value in each row. Click a column to select it.</p>
-    </SidebarSection>
+    </section>
   )
 })
 

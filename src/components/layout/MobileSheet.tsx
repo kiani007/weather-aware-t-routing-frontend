@@ -1,6 +1,6 @@
 import { useRef, type PointerEvent, type ReactNode } from 'react'
 
-import { cn } from '@/lib/utils'
+import { TabList } from '@/components/common/TabList'
 
 export type SheetSnap = 'peek' | 'half' | 'full'
 
@@ -89,30 +89,16 @@ export function MobileSheet<Id extends string>({
         </button>
       )}
 
-      <div role="tablist" aria-label="Trip panels" className="flex shrink-0 gap-1 border-b px-3">
-        {tabs.map((item) => {
-          const active = item.id === tab
-          return (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              disabled={item.disabled}
-              onClick={() => {
-                onTabChange(item.id)
-                if (!expanded) onSnapChange('half')
-              }}
-              className={cn(
-                '-mb-px border-b-2 px-3 py-2 text-xs font-medium transition-colors disabled:opacity-40',
-                active ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground',
-              )}
-            >
-              {item.label}
-            </button>
-          )
-        })}
-      </div>
+      <TabList
+        label="Trip panels"
+        tabs={tabs}
+        tab={tab}
+        onSelect={(next) => {
+          onTabChange(next)
+          if (!expanded) onSnapChange('half')
+        }}
+        className="px-3"
+      />
 
       {tabs.map((item) => (
         <div

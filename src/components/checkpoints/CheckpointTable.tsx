@@ -19,10 +19,8 @@ export const CheckpointTable = memo(function CheckpointTable({
   onFocus,
 }: CheckpointTableProps) {
   return (
-    <section aria-label={`${routeName} checkpoints`} className="flex min-h-64 flex-1 flex-col gap-2.5">
-      <h2 className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-        Checkpoints · {checkpoints.length}
-      </h2>
+    // Titled by the surrounding tab ("Checkpoints · N"), so no heading of its own
+    <section aria-label={`${routeName} checkpoints`} className="flex min-h-64 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-auto rounded-lg border">
         <Table className="text-[11px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:h-8 [&_th]:px-1.5">
           <TableHeader className="sticky top-0 bg-background">
