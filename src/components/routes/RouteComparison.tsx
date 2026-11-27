@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from 'react'
 
-import { RiskBadge } from '@/components/common/RiskBadge'
+import { RiskLabel } from '@/components/common/RiskLabel'
 import { SidebarSection } from '@/components/common/SidebarSection'
 import { ROUTE_COLORS } from '@/constants/map'
 import { cn } from '@/lib/utils'
@@ -30,7 +30,7 @@ const ROWS: Row[] = [
   { label: 'Distance', render: (r) => formatMiles(r.distance_mi), score: (r) => r.distance_mi },
   { label: 'Drive time', render: (r) => formatDuration(r.duration_s), score: (r) => r.duration_s },
   { label: 'ETA', render: (r) => formatShortDateTime(r.arrival_at) },
-  { label: 'Max risk', render: (r) => <RiskBadge risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
+  { label: 'Max risk', render: (r) => <RiskLabel risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
   { label: 'Severe+', render: (r) => formatMiles(severeMiles(r)), score: severeMiles },
   // Same order as the backend ranking: unverified weather counts right after Severe
   { label: 'Unverified', render: (r) => formatMiles(unknownMiles(r)), score: unknownMiles },

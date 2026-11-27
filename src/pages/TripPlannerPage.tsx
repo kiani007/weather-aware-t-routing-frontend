@@ -86,7 +86,13 @@ export function TripPlannerPage() {
   const planPanel = <TripForm onSubmit={plan.mutate} submitting={plan.isPending} error={plan.error?.message} />
   const comparePanel = trip && (
     <>
-      {recommendedRoute && <RecommendationNote route={recommendedRoute} />}
+      {recommendedRoute && (
+        <RecommendationNote
+          route={recommendedRoute}
+          selected={recommendedRoute.id === selectedRouteId}
+          onSelect={selectRoute}
+        />
+      )}
       <RouteComparison routes={trip.routes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />
     </>
   )

@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
+import { RiskLabel } from '@/components/common/RiskLabel'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { RISK_STYLES } from '@/constants/risk'
 import type { Checkpoint } from '@/types/trip'
 import { formatInches, formatMeasure, formatTime, formatWeekday } from '@/utils/format'
 
@@ -39,7 +39,6 @@ export const CheckpointTable = memo(function CheckpointTable({
             {checkpoints.map((cp, index) => {
               const previous = checkpoints[index - 1]
               const newDay = !previous || formatWeekday(previous.eta) !== formatWeekday(cp.eta)
-              const risk = cp.risk ? RISK_STYLES[cp.risk.key] : null
               return (
                 <TableRow
                   key={cp.sequence}
@@ -57,11 +56,8 @@ export const CheckpointTable = memo(function CheckpointTable({
                   <TableCell>{formatInches(cp.rain_in_hr)}</TableCell>
                   <TableCell>{formatInches(cp.snow_in_hr)}</TableCell>
                   <TableCell>
-                    {risk ? (
-                      <span className="flex items-center gap-1 font-medium whitespace-nowrap" style={{ color: risk.color }}>
-                        <span className="size-1.5 rounded-full" style={{ backgroundColor: risk.color }} />
-                        {risk.label}
-                      </span>
+                    {cp.risk ? (
+                      <RiskLabel risk={cp.risk.key} />
                     ) : (
                       <span className="text-muted-foreground">Unknown</span>
                     )}
