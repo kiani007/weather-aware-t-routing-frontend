@@ -12,8 +12,8 @@ import { RouteLayers, type DecodedRoute } from '@/components/map/RouteLayers'
 import { TripMap } from '@/components/map/TripMap'
 import { TruckMarker } from '@/components/map/TruckMarker'
 import { RecommendationNote } from '@/components/routes/RecommendationNote'
+import { RouteComparison } from '@/components/routes/RouteComparison'
 import { RouteSelector } from '@/components/routes/RouteSelector'
-import { RouteSummary } from '@/components/routes/RouteSummary'
 import { TripForm } from '@/components/trip-form/TripForm'
 import { PLAYBACK_INTERVAL_MS } from '@/constants/heatmap'
 import { usePlanTrip } from '@/hooks/usePlanTrip'
@@ -67,7 +67,7 @@ export function TripPlannerPage() {
     <>
       <TripForm onSubmit={plan.mutate} submitting={plan.isPending} error={plan.error?.message} />
       {recommendedRoute && <RecommendationNote route={recommendedRoute} />}
-      {selectedRoute && <RouteSummary route={selectedRoute} />}
+      {trip && <RouteComparison routes={trip.routes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />}
       {selectedRoute && (
         <CheckpointTable
           routeName={selectedRoute.name}
