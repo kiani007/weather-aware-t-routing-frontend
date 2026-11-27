@@ -29,12 +29,21 @@ const ROWS: Row[] = [
   { label: 'Distance', render: (r) => formatMiles(r.distance_mi), score: (r) => r.distance_mi },
   { label: 'Drive time', render: (r) => formatDuration(r.duration_s), score: (r) => r.duration_s },
   { label: 'ETA', render: (r) => formatShortDateTime(r.arrival_at) },
-  { label: 'Max risk', render: (r) => <RiskLabel risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
+  // No verified weather scores as the worst value, so it is never bolded as "best"
+  {
+    label: 'Max risk',
+    render: (r) => <RiskLabel risk={r.max_risk?.key ?? null} />,
+    score: (r) => r.max_risk?.value ?? Infinity,
+  },
   { label: 'Severe+', render: (r) => formatMiles(severeMiles(r)), score: severeMiles },
   // Same order as the backend ranking: unverified weather counts right after Severe
   { label: 'Unverified', render: (r) => formatMiles(unknownMiles(r)), score: unknownMiles },
   { label: 'High', render: (r) => formatMiles(r.risk_miles.high), score: (r) => r.risk_miles.high },
-  { label: 'Avg risk', render: (r) => r.average_risk.toFixed(2), score: (r) => r.average_risk },
+  {
+    label: 'Avg risk',
+    render: (r) => (r.average_risk == null ? '—' : r.average_risk.toFixed(2)),
+    score: (r) => r.average_risk ?? Infinity,
+  },
   {
     label: 'Risk mix',
     render: (r) => <RiskDistributionBar riskMiles={r.risk_miles} unknownMiles={unknownMiles(r)} />,

@@ -17,11 +17,17 @@ import { RecommendationNote } from '@/components/routes/RecommendationNote'
 import { RouteComparison } from '@/components/routes/RouteComparison'
 import { RouteSelector } from '@/components/routes/RouteSelector'
 import { SelectedRouteSummary } from '@/components/routes/SelectedRouteSummary'
+import { ApiError } from '@/api/client'
+import { PastTripNote } from '@/components/trip-form/PastTripNote'
+import { RecentTrips } from '@/components/trip-form/RecentTrips'
 import { TripForm } from '@/components/trip-form/TripForm'
 import { TripSummary } from '@/components/trip-form/TripSummary'
 import { PLAYBACK_INTERVAL_MS } from '@/constants/heatmap'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useLoadTrip } from '@/hooks/useLoadTrip'
 import { usePlanTrip } from '@/hooks/usePlanTrip'
+import { useRecentTrips } from '@/hooks/useRecentTrips'
+import { valuesFromTrip, type TripFormValues } from '@/hooks/useTripForm'
 import { usePlayback } from '@/hooks/usePlayback'
 import { useTripHeatmap } from '@/hooks/useTripHeatmap'
 import type { HeatmapMetric } from '@/types/heatmap'
@@ -48,17 +54,50 @@ export function TripPlannerPage() {
   const [formOpen, setFormOpen] = useState(true)
   const [detailTab, setDetailTab] = useState<DetailTab>('compare')
 
-  const plan = usePlanTrip((planned) => {
-    setTrip(planned)
-    setSelectedRouteId(planned.routes.find((route) => route.is_recommended)?.id ?? planned.routes[0]?.id ?? null)
+  const recent = useRecentTrips()
+  // Remounting the form with a new key reseeds it, e.g. with a reopened trip's values
+  const [formSeed, setFormSeed] = useState<{ key: string; values?: Partial<TripFormValues> }>({ key: 'new' })
+
+  const showTrip = (shown: Trip) => {
+    setTrip(shown)
+    setSelectedRouteId(shown.routes.find((route) => route.is_recommended)?.id ?? shown.routes[0]?.id ?? null)
     setFocusedSequence(null)
     playback.reset()
+    recent.remember(shown)
     // Mobile: show the routes on the map, with the comparison one tap away
     setSheetTab('compare')
     setSheetSnap('peek')
     // Desktop: fold the form away so the results get the sidebar
     setFormOpen(false)
+  }
+
+  const plan = usePlanTrip(showTrip)
+  const load = useLoadTrip((loaded) => {
+    showTrip(loaded)
+    setFormSeed({ key: loaded.id, values: valuesFromTrip(loaded) })
   })
+  const [recentError, setRecentError] = useState<string>()
+
+  const openRecent = (id: string) => {
+    setRecentError(undefined)
+    load.mutate(id, {
+      onError: (error) => {
+        if (error instanceof ApiError && error.status === 404) {
+          recent.forget(id)
+          setRecentError('That trip is no longer available, so it was removed from the list.')
+        } else {
+          setRecentError(error.message)
+        }
+      },
+    })
+  }
+
+  const showRecentList = () => {
+    setFormOpen(true)
+    setSheetTab('plan')
+    setSheetSnap('full')
+    requestAnimationFrame(() => document.getElementById(RECENT_TRIPS_ID)?.scrollIntoView({ block: 'start' }))
+  }
 
   const decodedRoutes = useMemo<DecodedRoute[]>(
     () => trip?.routes.map((route) => ({ route, path: decodePolyline(route.polyline) })) ?? [],
@@ -89,13 +128,36 @@ export function TripPlannerPage() {
     [isMobile],
   )
 
-  const planPanel = <TripForm onSubmit={plan.mutate} submitting={plan.isPending} error={plan.error?.message} />
+  const planPanel = (
+    <div className="flex flex-col gap-5">
+      <TripForm
+        key={formSeed.key}
+        initialValues={formSeed.values}
+        onSubmit={plan.mutate}
+        submitting={plan.isPending}
+        error={plan.error?.message}
+      />
+      <div id={RECENT_TRIPS_ID}>
+        <RecentTrips
+          trips={recent.trips}
+          activeTripId={trip?.id ?? null}
+          loadingTripId={load.isPending ? (load.variables ?? null) : null}
+          error={recentError}
+          onOpen={openRecent}
+          onClear={recent.clear}
+        />
+      </div>
+    </div>
+  )
   const recommendation = recommendedRoute && (
-    <RecommendationNote
-      route={recommendedRoute}
-      selected={recommendedRoute.id === selectedRouteId}
-      onSelect={selectRoute}
-    />
+    <>
+      {trip && <PastTripNote key={trip.id} trip={trip} />}
+      <RecommendationNote
+        route={recommendedRoute}
+        selected={recommendedRoute.id === selectedRouteId}
+        onSelect={selectRoute}
+      />
+    </>
   )
   const comparison = trip && (
     <RouteComparison routes={trip.routes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />
@@ -121,7 +183,13 @@ export function TripPlannerPage() {
   const checkpointsLabel = selectedRoute ? `Checkpoints · ${selectedRoute.checkpoints.length}` : 'Checkpoints'
   const sidebar = (
     <>
-      {trip && formHidden && <TripSummary trip={trip} onEdit={() => setFormOpen(true)} />}
+      {trip && formHidden && (
+        <TripSummary
+          trip={trip}
+          onEdit={() => setFormOpen(true)}
+          onShowRecent={recent.trips.length ? showRecentList : undefined}
+        />
+      )}
       {trip && formOpen && (
         <button
           type="button"
@@ -216,6 +284,8 @@ export function TripPlannerPage() {
 
   return <AppShell sidebar={sidebar} sheet={sheet} main={main} />
 }
+
+const RECENT_TRIPS_ID = 'recent-trips'
 
 type PanelId = 'plan' | 'compare' | 'checkpoints'
 type DetailTab = 'compare' | 'checkpoints'

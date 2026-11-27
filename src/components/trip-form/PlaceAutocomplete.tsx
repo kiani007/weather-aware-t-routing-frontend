@@ -67,7 +67,11 @@ export function PlaceAutocomplete({ id, value, onChange, placeholder, invalid }:
           setText(event.target.value)
           setOpen(true)
           setActiveIndex(0)
-          if (value) onChange(null)
+          if (value) {
+            // Mark the clear as ours, so the sync above doesn't wipe the character just typed
+            setSyncedLabel(undefined)
+            onChange(null)
+          }
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => window.setTimeout(() => setOpen(false), 120)}

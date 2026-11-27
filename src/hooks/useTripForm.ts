@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import type { Place } from '@/types/geo'
-import type { SampleInterval, TripPlanRequest } from '@/types/trip'
+import type { SampleInterval, Trip, TripPlanRequest } from '@/types/trip'
 import { addDays, nextHalfHour, toLocalInputValue } from '@/utils/datetime'
 
 export const MAX_DAYS_AHEAD = 7
@@ -45,8 +45,20 @@ function validate(values: TripFormValues): TripFormErrors {
   return errors
 }
 
-export function useTripForm() {
-  const [values, setValues] = useState<TripFormValues>(initialValues)
+/** Form values that reopen a saved trip; a departure already in the past moves to the next half hour. */
+export function valuesFromTrip(trip: Trip): Partial<TripFormValues> {
+  const departure = new Date(trip.departure_at)
+  return {
+    origin: trip.origin,
+    destination: trip.destination,
+    departure: toLocalInputValue(departure.getTime() > Date.now() ? departure : nextHalfHour()),
+    loadWeight: String(trip.load_weight_lb),
+    interval: trip.sample_interval_mi,
+  }
+}
+
+export function useTripForm(seed?: Partial<TripFormValues>) {
+  const [values, setValues] = useState<TripFormValues>(() => ({ ...initialValues(), ...seed }))
   const [submitted, setSubmitted] = useState(false)
   const errors = useMemo(() => validate(values), [values])
   const isValid = Object.keys(errors).length === 0

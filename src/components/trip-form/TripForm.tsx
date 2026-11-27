@@ -6,7 +6,7 @@ import { Spinner } from '@/components/common/Spinner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { MAX_DAYS_AHEAD, useTripForm } from '@/hooks/useTripForm'
+import { MAX_DAYS_AHEAD, useTripForm, type TripFormValues } from '@/hooks/useTripForm'
 import { SAMPLE_INTERVALS, type SampleInterval, type TripPlanRequest } from '@/types/trip'
 import { addDays, toLocalInputValue } from '@/utils/datetime'
 
@@ -17,10 +17,12 @@ interface TripFormProps {
   onSubmit: (request: TripPlanRequest) => void
   submitting: boolean
   error?: string
+  /** Starting values, read once on mount; remount with a new key to reseed */
+  initialValues?: Partial<TripFormValues>
 }
 
-export const TripForm = memo(function TripForm({ onSubmit, submitting, error }: TripFormProps) {
-  const { values, errors, setField, swapLocations, toRequest } = useTripForm()
+export const TripForm = memo(function TripForm({ onSubmit, submitting, error, initialValues }: TripFormProps) {
+  const { values, errors, setField, swapLocations, toRequest } = useTripForm(initialValues)
   const [bounds] = useState(() => ({
     min: toLocalInputValue(new Date()),
     max: toLocalInputValue(addDays(new Date(), MAX_DAYS_AHEAD)),

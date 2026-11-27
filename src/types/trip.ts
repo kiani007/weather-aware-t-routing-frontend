@@ -40,8 +40,9 @@ export interface RouteOption {
   risk_miles: RiskMiles
   /** Miles whose weather could not be verified; not counted in risk_miles */
   unknown_miles: number
-  average_risk: number
-  max_risk: RiskLevel
+  /** Both null when no checkpoint on the route has a forecast (never a stand-in "safe" value) */
+  average_risk: number | null
+  max_risk: RiskLevel | null
   forecast_coverage: number
   is_recommended: boolean
   recommendation_reason: string

@@ -1,10 +1,11 @@
 import { cn } from '@/lib/utils'
 
-import { RISK_STYLES } from '@/constants/risk'
+import { riskStyle } from '@/constants/risk'
 import type { RiskKey } from '@/types/risk'
 
-export function RiskBadge({ risk, className }: { risk: RiskKey; className?: string }) {
-  const style = RISK_STYLES[risk]
+/** Pill-style risk badge. Null shows Unknown. */
+export function RiskBadge({ risk, className }: { risk: RiskKey | null; className?: string }) {
+  const style = riskStyle(risk)
   return (
     <span
       className={cn(
