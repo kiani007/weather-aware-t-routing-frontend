@@ -60,6 +60,27 @@ describe('RouteComparison', () => {
     expect(onSelect).toHaveBeenNthCalledWith(1, 12)
     expect(onSelect).toHaveBeenNthCalledWith(2, 12)
   })
+
+  it('shows Unknown and a dash for a route with no verified weather, never Low or 0.00', () => {
+    const unverified = makeRoute({
+      id: 13,
+      index: 2,
+      name: 'Route C',
+      risk_miles: { low: 0, moderate: 0, high: 0, severe: 0, no_travel: 0 },
+      unknown_miles: 340.8,
+      forecast_coverage: 0,
+      max_risk: null,
+      average_risk: null,
+    })
+    render(<RouteComparison routes={[routes[0]!, unverified]} selectedRouteId={11} onSelect={() => {}} />)
+
+    const maxRow = screen.getByRole('row', { name: /Max risk/ })
+    expect(within(maxRow).getByText('Unknown').closest('td')).not.toHaveClass('font-semibold')
+    expect(within(maxRow).getByText('Low').closest('td')).toHaveClass('font-semibold')
+    const avgRow = screen.getByRole('row', { name: /Avg risk/ })
+    expect(within(avgRow).getByText('—')).not.toHaveClass('font-semibold')
+    expect(within(avgRow).getByText('0.00')).toHaveClass('font-semibold')
+  })
 })
 
 describe('RecommendationNote', () => {
@@ -112,5 +133,16 @@ describe('RecommendationNote', () => {
     render(<RecommendationNote route={makeRoute({ is_recommended: true, max_risk: riskLevel('no_travel') })} />)
 
     expect(screen.getByText(/Every option crosses No Travel conditions/)).toBeInTheDocument()
+  })
+
+  it('reports Unknown maximum risk when nothing on the route was verified', () => {
+    render(
+      <RecommendationNote
+        route={makeRoute({ is_recommended: true, max_risk: null, average_risk: null, forecast_coverage: 0 })}
+      />,
+    )
+
+    expect(screen.getByText('Maximum risk').nextElementSibling).toHaveTextContent('Unknown')
+    expect(screen.getByText('Forecast coverage').nextElementSibling).toHaveTextContent('0%')
   })
 })

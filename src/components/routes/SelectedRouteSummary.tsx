@@ -16,7 +16,7 @@ export function SelectedRouteSummary({ route }: { route: RouteOption }) {
           · {formatDuration(route.duration_s)} · {formatMiles(route.distance_mi)}
         </span>
       </span>
-      <RiskBadge risk={route.max_risk.key} />
+      <RiskBadge risk={route.max_risk?.key ?? null} />
     </>
   )
 }

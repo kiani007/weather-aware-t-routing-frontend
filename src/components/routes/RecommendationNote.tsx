@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { RISK_STYLES } from '@/constants/risk'
+import { riskStyle } from '@/constants/risk'
 import type { RouteOption } from '@/types/trip'
 import { formatDuration, formatMiles } from '@/utils/format'
 
@@ -12,7 +12,8 @@ interface RecommendationNoteProps {
 }
 
 export function RecommendationNote({ route, selected = true, onSelect }: RecommendationNoteProps) {
-  const blocked = route.max_risk.key === 'no_travel'
+  const blocked = route.max_risk?.key === 'no_travel'
+  const maxRisk = riskStyle(route.max_risk?.key ?? null)
   const unverified = route.unknown_miles ?? 0
 
   return (
@@ -40,7 +41,7 @@ export function RecommendationNote({ route, selected = true, onSelect }: Recomme
         <Fact label="Distance" value={formatMiles(route.distance_mi)} />
         <Fact
           label="Maximum risk"
-          value={<span style={{ color: RISK_STYLES[route.max_risk.key].color }}>{route.max_risk.label}</span>}
+          value={<span style={{ color: maxRisk.color }}>{maxRisk.label}</span>}
         />
         <Fact
           label="Forecast coverage"

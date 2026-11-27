@@ -16,7 +16,15 @@ export const RISK_STYLES: Record<RiskKey, RiskStyle> = {
   no_travel: { label: 'No Travel', color: '#7f1d1d', badgeClass: 'bg-red-100 text-red-900 ring-red-900/30' },
 }
 
-// Checkpoints whose weather could not be verified
+// Checkpoints and routes whose weather could not be verified
 export const UNKNOWN_RISK_COLOR = '#94a3b8'
+export const UNKNOWN_RISK_STYLE: RiskStyle = {
+  label: 'Unknown',
+  color: UNKNOWN_RISK_COLOR,
+  badgeClass: 'bg-slate-50 text-slate-600 ring-slate-500/20',
+}
 
-export const riskKeyFromValue =(value: RiskValue): RiskKey => RISK_ORDER[value] ?? 'low'
+/** Style for a risk level, or the Unknown style when there is none */
+export const riskStyle = (risk: RiskKey | null): RiskStyle => (risk ? RISK_STYLES[risk] : UNKNOWN_RISK_STYLE)
+
+export const riskKeyFromValue = (value: RiskValue): RiskKey => RISK_ORDER[value] ?? 'low'
