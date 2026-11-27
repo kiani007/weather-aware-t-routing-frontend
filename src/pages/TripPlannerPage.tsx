@@ -87,9 +87,7 @@ export function TripPlannerPage() {
           <>
             <FitBounds points={allPoints} />
             <RouteLayers routes={decodedRoutes} selectedRouteId={selectedRouteId} onSelect={selectRoute} />
-            {trip.routes.map((route) => (
-              <CheckpointMarkers key={route.id} route={route} emphasized={route.id === selectedRouteId} />
-            ))}
+            {selectedRoute && <CheckpointMarkers key={selectedRoute.id} route={selectedRoute} />}
             <EndpointMarkers origin={trip.origin} destination={trip.destination} />
             <FocusedCheckpoint checkpoint={focusedCheckpoint} />
             <TruckMarker position={truckPosition} label={truckStatus} />
