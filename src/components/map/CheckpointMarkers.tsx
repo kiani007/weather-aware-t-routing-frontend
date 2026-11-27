@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { CircleMarker, Popup } from 'react-leaflet'
 
 import { CHECKPOINT_RADIUS } from '@/constants/map'
-import { RISK_STYLES } from '@/constants/risk'
+import { RISK_STYLES, UNKNOWN_RISK_COLOR } from '@/constants/risk'
 import type { RouteOption } from '@/types/trip'
 
 import { CheckpointPopup } from './CheckpointPopup'
@@ -12,7 +12,7 @@ import { CheckpointPopup } from './CheckpointPopup'
 // Remount (key by route id) after the route lines so the dots draw on top.
 export const CheckpointMarkers = memo(function CheckpointMarkers({ route }: { route: RouteOption }) {
   return route.checkpoints.map((cp) => {
-    const color = cp.has_forecast ? RISK_STYLES[cp.risk.key].color : '#94a3b8'
+    const color = cp.risk ? RISK_STYLES[cp.risk.key].color : UNKNOWN_RISK_COLOR
     return (
       <CircleMarker
         key={`${route.id}-${cp.sequence}`}

@@ -9,10 +9,10 @@ export function CheckpointPopup({ routeName, checkpoint: cp }: { routeName: stri
         <span className="font-semibold text-slate-900">
           {routeName} · mile {Math.round(cp.mile_marker)}
         </span>
-        {cp.has_forecast && <RiskBadge risk={cp.risk.key} />}
+        {cp.risk && <RiskBadge risk={cp.risk.key} />}
       </div>
       <p className="text-slate-600">ETA {formatDateTime(cp.eta)}</p>
-      {cp.has_forecast ? (
+      {cp.risk ? (
         <dl className="grid grid-cols-3 gap-1 text-slate-700">
           <div>
             <dt className="text-slate-400">Wind</dt>
@@ -28,9 +28,9 @@ export function CheckpointPopup({ routeName, checkpoint: cp }: { routeName: stri
           </div>
         </dl>
       ) : (
-        <p className="text-amber-700">No forecast available for this ETA.</p>
+        <p className="text-amber-700">Weather unknown: no forecast available for this ETA.</p>
       )}
-      {cp.reasons.length > 0 && cp.has_forecast && (
+      {cp.reasons.length > 0 && cp.risk && (
         <ul className="list-disc pl-4 text-slate-600">
           {cp.reasons.map((reason) => (
             <li key={reason}>{reason}</li>

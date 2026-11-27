@@ -16,7 +16,8 @@ const routes = [
     distance_mi: 310.2,
     duration_s: 20_892,
     max_risk: riskLevel('severe'),
-    risk_miles: { low: 260, moderate: 20, high: 10, severe: 15, no_travel: 5.2 },
+    risk_miles: { low: 230, moderate: 20, high: 10, severe: 15, no_travel: 5.2 },
+    unknown_miles: 30,
     forecast_coverage: 0.9,
   }),
 ]
@@ -31,7 +32,14 @@ describe('RouteComparison', () => {
     expect(screen.getByText('310.2 mi')).toBeInTheDocument()
     expect(screen.getByText('20.2 mi')).toBeInTheDocument()
     expect(screen.getByText('Severe')).toBeInTheDocument()
-    expect(screen.getByText('90%')).toBeInTheDocument()
+  })
+
+  it('shows unverified weather miles', () => {
+    render(<RouteComparison routes={routes} selectedRouteId={11} onSelect={() => {}} />)
+
+    const unverifiedRow = screen.getByRole('row', { name: /Unverified/ })
+    expect(within(unverifiedRow).getByText('30 mi')).toBeInTheDocument()
+    expect(within(unverifiedRow).getByText('0 mi')).toHaveClass('font-semibold')
   })
 
   it('bolds the best value in a row', () => {

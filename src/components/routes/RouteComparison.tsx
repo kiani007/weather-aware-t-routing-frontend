@@ -23,6 +23,8 @@ interface Row {
 }
 
 const severeMiles = (route: RouteOption) => route.risk_miles.severe + route.risk_miles.no_travel
+// Older API responses have no unknown_miles field
+const unknownMiles = (route: RouteOption) => route.unknown_miles ?? 0
 
 const ROWS: Row[] = [
   { label: 'Distance', render: (r) => formatMiles(r.distance_mi), score: (r) => r.distance_mi },
@@ -30,9 +32,14 @@ const ROWS: Row[] = [
   { label: 'ETA', render: (r) => formatShortDateTime(r.arrival_at) },
   { label: 'Max risk', render: (r) => <RiskBadge risk={r.max_risk.key} />, score: (r) => r.max_risk.value },
   { label: 'Severe+', render: (r) => formatMiles(severeMiles(r)), score: severeMiles },
+  // Same order as the backend ranking: unverified weather counts right after Severe
+  { label: 'Unverified', render: (r) => formatMiles(unknownMiles(r)), score: unknownMiles },
   { label: 'High', render: (r) => formatMiles(r.risk_miles.high), score: (r) => r.risk_miles.high },
   { label: 'Avg risk', render: (r) => r.average_risk.toFixed(2), score: (r) => r.average_risk },
-  { label: 'Risk mix', render: (r) => <RiskDistributionBar riskMiles={r.risk_miles} /> },
+  {
+    label: 'Risk mix',
+    render: (r) => <RiskDistributionBar riskMiles={r.risk_miles} unknownMiles={unknownMiles(r)} />,
+  },
 ]
 
 export const RouteComparison = memo(function RouteComparison({
@@ -40,10 +47,6 @@ export const RouteComparison = memo(function RouteComparison({
   selectedRouteId,
   onSelect,
 }: RouteComparisonProps) {
-  const rows = routes.some((r) => r.forecast_coverage < 1)
-    ? [...ROWS, { label: 'Forecast', render: (r: RouteOption) => `${Math.round(r.forecast_coverage * 100)}%` }]
-    : ROWS
-
   return (
     <SidebarSection title="Compare routes">
       <div className="overflow-hidden rounded-lg border">
@@ -79,7 +82,7 @@ export const RouteComparison = memo(function RouteComparison({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {ROWS.map((row) => {
               const best = row.score && bestScore(routes, row.score)
               return (
                 <tr key={row.label} className="border-t first:border-t-0">

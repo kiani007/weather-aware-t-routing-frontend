@@ -39,7 +39,7 @@ export const CheckpointTable = memo(function CheckpointTable({
             {checkpoints.map((cp, index) => {
               const previous = checkpoints[index - 1]
               const newDay = !previous || formatWeekday(previous.eta) !== formatWeekday(cp.eta)
-              const risk = RISK_STYLES[cp.risk.key]
+              const risk = cp.risk ? RISK_STYLES[cp.risk.key] : null
               return (
                 <TableRow
                   key={cp.sequence}
@@ -57,13 +57,13 @@ export const CheckpointTable = memo(function CheckpointTable({
                   <TableCell>{formatInches(cp.rain_in_hr)}</TableCell>
                   <TableCell>{formatInches(cp.snow_in_hr)}</TableCell>
                   <TableCell>
-                    {cp.has_forecast ? (
+                    {risk ? (
                       <span className="flex items-center gap-1 font-medium whitespace-nowrap" style={{ color: risk.color }}>
                         <span className="size-1.5 rounded-full" style={{ backgroundColor: risk.color }} />
                         {risk.label}
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">n/a</span>
+                      <span className="text-muted-foreground">Unknown</span>
                     )}
                   </TableCell>
                 </TableRow>
